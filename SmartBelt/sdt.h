@@ -57,9 +57,9 @@ unsigned long sdtStartTime;
 #define SDT_TIME_THR 60
 
 //存储竖直方向加速度信息
-#define SDT_ACCEL_NUM 30
-double sdtAccel[SDT_ACCEL_NUM];
-int sdtAccelP;
+
+double sdtAccel[SDT_ACCEL_NUM]; //竖直加速度长度
+int sdtAccelP; //数组指针
 bool sdtCheck_res;
 
 
