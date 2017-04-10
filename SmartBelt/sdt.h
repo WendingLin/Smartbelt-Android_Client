@@ -6,6 +6,7 @@
 #include "file.h"
 #include "alarmHandler.h"
 #include "BLEhandler.h"
+#include "sdtCheck.h"
 
 unsigned long sdtTime;
 unsigned long sdtCacheTime;
@@ -55,6 +56,12 @@ unsigned long sdtStartTime;
 ////#define SDT_TIME_THR 7200
 #define SDT_TIME_THR 60
 
+//存储竖直方向加速度信息
+#define SDT_ACCEL_NUM 30
+double sdtAccel[SDT_ACCEL_NUM];
+int sdtAccelP;
+bool sdtCheck_res;
+
 
 int sdtAlarmCtrl = 0;
 
@@ -99,12 +106,12 @@ void sdt_save(unsigned long eT, unsigned long sT)
   if (eT == 0)
   {
     unsigned int params1[8] = {4, year(sT), month(sT), day(sT), hour(sT), minute(sT), 23, 59};
-    bleHandler.encode(s_temp,params1);
+    bleHandler.encode(s_temp, params1);
   }
   else
   {
     unsigned int params2[8] = {4, year(eT), month(eT), day(eT), hour(sT), minute(sT), hour(eT), minute(eT)};
-    bleHandler.encode(s_temp,params2);
+    bleHandler.encode(s_temp, params2);
   }
   myFile.println(s_temp);
   myFile.close();
@@ -118,6 +125,7 @@ void sdt_init()
   //switchLED.show(); // Initialize all pixels to 'off'
   sdtShortP = 0;
   sdtLongP = 0;
+  sdtAccelP = 0;
   for (int i = 0; i < SDT_LONG_LEN; i++)
   {
     sdtLong[i] = 1;
@@ -163,6 +171,7 @@ void sdt_judge()
     sdt_alarm();
     sdtShort[sdtShortP] = abs(aaWorld.z) + abs(aaWorld.x) + abs(aaWorld.y);
     sdtShortAvg += sdtShort[sdtShortP];
+    sdtAccel[sdtAccelP] = aaWorld.z;
     if (sdtShortP == SDT_SHORT_LEN - 1)
     {
       sdtShortAvg /= (double)SDT_SHORT_LEN;
@@ -191,35 +200,40 @@ void sdt_judge()
       //1-0
       if (sdtCount0 > SDT_0_THR && sdtState)
       {
-        sdtState = 0; //坐
-        sdtStartTime = now();
-        sdtAlarmFlag = 1;
-        sdtAlarmCtrl = 0;
-
-        if (SD.exists("SDT_CAC.TXT"))
+        //当进入静止状态时检测前一段时间是否出现坐下的动作
+        sdtCheck_res=sdtCheck(sdtAccel,sdtAccelP);
+        if(sdtCheck_res)
         {
-          myFile = SD.open("SDT_CAC.TXT");
-          unsigned long sdtCacheST = strToLong(myFile.readStringUntil('\n'));
-          unsigned long sdtCacheET = strToLong(myFile.readStringUntil('\n'));
-          myFile.close();
-          SD.remove("SDT_CAC.TXT");
-          if (sdtStartTime - sdtCacheET <= SDT_MERGE_INTERVAL)
+          sdtState = 0; //坐
+          sdtStartTime = now();
+          sdtAlarmFlag = 1;
+          sdtAlarmCtrl = 0;
+
+          if (SD.exists("SDT_CAC.TXT"))
           {
-            myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
-            myFile.println(sdtCacheST);
-            myFile.println(sdtStartTime);
+            myFile = SD.open("SDT_CAC.TXT");
+            unsigned long sdtCacheST = strToLong(myFile.readStringUntil('\n'));
+            unsigned long sdtCacheET = strToLong(myFile.readStringUntil('\n'));
             myFile.close();
-            //改变起始时间
-            sdtStartTime = sdtCacheST;
-          }
-          else
-          {
-            sdt_save(sdtCacheET, sdtCacheST);
-            //写入新的缓存数据
-            myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
-            myFile.println(sdtStartTime);
-            myFile.println(now());
-            myFile.close();
+            SD.remove("SDT_CAC.TXT");
+            if (sdtStartTime - sdtCacheET <= SDT_MERGE_INTERVAL)
+            {
+              myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
+              myFile.println(sdtCacheST);
+              myFile.println(sdtStartTime);
+              myFile.close();
+              //改变起始时间
+              sdtStartTime = sdtCacheST;
+            }
+            else
+            {
+              sdt_save(sdtCacheET, sdtCacheST);
+              //写入新的缓存数据
+              myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
+              myFile.println(sdtStartTime);
+              myFile.println(now());
+              myFile.close();
+            }
           }
         }
       }
@@ -229,7 +243,7 @@ void sdt_judge()
         if (now() - sdtStartTime < SDT_TIME_THR)
         {
           //最小值为SDT_LONG_LEN1_MIN，最大值为SDT_LONG_LEN
-          SDT_LONG_LEN1 = SDT_LONG_LEN1_MIN + (now() - sdtStartTime) * (SDT_LONG_LEN - SDT_LONG_LEN1_MIN) /7200; //SDT_TIME_THR;
+          SDT_LONG_LEN1 = SDT_LONG_LEN1_MIN + (now() - sdtStartTime) * (SDT_LONG_LEN - SDT_LONG_LEN1_MIN) / 7200; //SDT_TIME_THR;
         }
         else
         {
@@ -251,32 +265,32 @@ void sdt_judge()
         sdt_save(now(), sdtStartTime);
       }
       sdtLongP = (sdtLongP + 1) % SDT_LONG_LEN;
-//            Serial.print("average:");
-//            Serial.print(sdtShortAvg);
-//            Serial.print("  sdtShortVar:");
-//            Serial.print(sdtShortVar);
-//            Serial.print("  sdtStartTime=");
-//            Serial.print(sdtStartTime);
-//            Serial.print("  ");
-//            Serial.print(sdtLong[sdtLongP - 1]);
-//            Serial.print("  count0=");
-//            Serial.print(sdtCount0);
-//            Serial.print("  count1=");
-//            Serial.print(sdtCount1);
-//            Serial.print("  len=");
-//            Serial.print(SDT_LONG_LEN1);
-//            Serial.print("  state:");
-//            Serial.println(sdtState);
-//            Serial.print("AlarmFlag:");
-//            Serial.print(sdtAlarmFlag);
-//            Serial.print("  dtime:");
-//            Serial.print(now() - sdtStartTime);
-//            Serial.print("  Ctrl:");
-//            Serial.print(sdtAlarmCtrl);
-//            Serial.print("  thr");
-//            Serial.print(SDT_TIME_THR + sdtAlarmCtrl * (sdtDuration + 1) * 600);
-//            Serial.print("  now:");
-//            Serial.println(now());
+      //            Serial.print("average:");
+      //            Serial.print(sdtShortAvg);
+      //            Serial.print("  sdtShortVar:");
+      //            Serial.print(sdtShortVar);
+      //            Serial.print("  sdtStartTime=");
+      //            Serial.print(sdtStartTime);
+      //            Serial.print("  ");
+      //            Serial.print(sdtLong[sdtLongP - 1]);
+      //            Serial.print("  count0=");
+      //            Serial.print(sdtCount0);
+      //            Serial.print("  count1=");
+      //            Serial.print(sdtCount1);
+      //            Serial.print("  len=");
+      //            Serial.print(SDT_LONG_LEN1);
+      //            Serial.print("  state:");
+      //            Serial.println(sdtState);
+      //            Serial.print("AlarmFlag:");
+      //            Serial.print(sdtAlarmFlag);
+      //            Serial.print("  dtime:");
+      //            Serial.print(now() - sdtStartTime);
+      //            Serial.print("  Ctrl:");
+      //            Serial.print(sdtAlarmCtrl);
+      //            Serial.print("  thr");
+      //            Serial.print(SDT_TIME_THR + sdtAlarmCtrl * (sdtDuration + 1) * 600);
+      //            Serial.print("  now:");
+      //            Serial.println(now());
       //LED灯部分
       if (sdtState)
       {
@@ -290,6 +304,7 @@ void sdt_judge()
       }
     }
     sdtShortP = (sdtShortP + 1) % SDT_SHORT_LEN;
+    sdtAccelP = (sdtAccelP + 1) % SDT_ACCEL_NUM;
     sdtTime = millis();
   }
 }
