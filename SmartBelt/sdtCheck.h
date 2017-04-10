@@ -3,6 +3,31 @@
 #define SDT_ACCEL_POS_TH 20
 #define SDT_ACCEL_NEG_TH -20
 #define SDT_ACCEL_INTERVAL 10
+
+int ipCirculate(int sdtAccelP, int i){
+  return (sdtAccelP+i) % SDT_ACCEL_NUM;
+}
+
+bool posthCheck(double accelValue){
+  if(accelValue>SDT_ACCEL_POS_TH)
+    return true;
+  else
+    return false;
+}
+
+bool negthCheck(double accelValue){
+  if(accelValue<SDT_ACCEL_NEG_TH)
+    return true;
+  else
+    return false;
+}
+
+bool intervalCheck(int interval){
+  if(interval<SDT_ACCEL_INTERVAL)
+    return true;
+  else
+    return false;
+}
 bool sdtCheck(double* sdtAccel,int sdtAccelP){
 	bool inposTh=false;
 	bool innegTh=false;
@@ -38,28 +63,5 @@ bool sdtCheck(double* sdtAccel,int sdtAccelP){
 		return true;
 }
 
-int ipCirculate(int sdtAccelP, int i){
-	return (sdtAccelP+i) mod SDT_ACCEL_NUM;
-}
 
-bool posthCheck(double accelValue){
-	if(accelValue>SDT_ACCEL_POS_TH)
-		return true;
-	else
-		return false;
-}
-
-bool negthCheck(double accelValue){
-	if(accelValue<SDT_ACCEL_NEG_TH)
-		return true;
-	else
-		return false;
-}
-
-bool intervalCheck(int interval){
-	if(interval<SDT_ACCEL_INTERVAL)
-		return true;
-	else
-		return false;
-}
 
