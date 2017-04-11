@@ -1,7 +1,7 @@
 #define SDT_ACCEL_NUM 80
-#define SDT_PRIOR_NUM 40
-#define SDT_ACCEL_POS_TH 20
-#define SDT_ACCEL_NEG_TH -20
+#define SDT_PRIOR_NUM 80
+#define SDT_ACCEL_POS_TH 1000
+#define SDT_ACCEL_NEG_TH -500
 #define SDT_ACCEL_INTERVAL 10
 
 int ipCirculate(int sdtAccelP, int i){
@@ -33,6 +33,12 @@ bool sdtCheck(double* sdtAccel,int sdtAccelP){
 	bool innegTh=false;
 	int interval=SDT_PRIOR_NUM+1;
 	int accelCount=0;
+  for (int j=sdtAccelP+1; j<80; j++){
+    Serial.println(sdtAccel[ipCirculate(sdtAccelP, j)]);
+  }
+  for (int j=0; j<sdtAccelP+1; j++){
+    Serial.println(sdtAccel[ipCirculate(sdtAccelP, j)]);
+  }
 	for (int i=1; i<=40; i++){
 		if(inposTh==false){
 			inposTh=posthCheck(sdtAccel[ipCirculate(sdtAccelP, i)]);
