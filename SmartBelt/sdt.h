@@ -1,9 +1,8 @@
 #pragma once
-#include "SD.h"
+#include "EEPROMhandler.h"
 #include "trans.h"
 #include "switch.h"
 #include "time.h"
-#include "file.h"
 #include "alarmHandler.h"
 #include "BLEhandler.h"
 #include "sdtCheck.h"
@@ -56,9 +55,9 @@ unsigned long sdtStartTime;
 #define SDT_TIME_THR 7200
 
 //存储竖直方向加速度信息
-
-double sdtAccel[SDT_ACCEL_NUM]; //竖直加速度长度
-int sdtAccelP; //数组指针
+#define SDT_ACCEL_NUM 30
+double sdtAccel[SDT_ACCEL_NUM];
+int sdtAccelP;
 bool sdtCheck_res;
 
 
@@ -71,17 +70,9 @@ int sdtAlarmCtrl = 0;
 
 void sdt_noi_update()
 {
-  int sdt_noi = 0;
-  if (SD.exists("SST_NOI.TXT"))
-  {
-    myFile = SD.open("SDT_NOI.TXT");
-    sdt_noi = strToInt(myFile.readStringUntil('\n'));
-    myFile.close();
-    SD.remove("SDT_NOI.TXT");
-  }
-  SD.open("SDT_NOI.TXT", FILE_WRITE);
-  myFile.println(sdt_noi + 1);
-  myFile.close();
+  int sdt_noi;
+  EEPROM.get(34, sdt_noi);
+  EEPROM.put(34, sdt_noi + 1);
 }
 
 void sdt_cache()
@@ -90,18 +81,14 @@ void sdt_cache()
   {
     //Serial.println("cache!");
     sdtCacheTime = now();
-    SD.remove("SDT_CAC.TXT");
-    myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
-    myFile.println(sdtStartTime);
-    myFile.println(now());
-    myFile.close();
+    EEPROM.get(36, sdtStartTime);
+    EEPROM.get(40, sdtCacheTime);
   }
 }
 
 void sdt_save(unsigned long eT, unsigned long sT)
 {
   String s_temp;
-  myFile = SD.open("SDT_INF.TXT", FILE_WRITE);
   if (eT == 0)
   {
     unsigned int params1[8] = {4, year(sT), month(sT), day(sT), hour(sT), minute(sT), 23, 59};
@@ -112,10 +99,9 @@ void sdt_save(unsigned long eT, unsigned long sT)
     unsigned int params2[8] = {4, year(eT), month(eT), day(eT), hour(sT), minute(sT), hour(eT), minute(eT)};
     bleHandler.encode(s_temp, params2);
   }
-  myFile.println(s_temp);
-  myFile.close();
+  sdtInfoWrite(s_temp);
   sdt_noi_update();
-  SD.remove("SDT_CAC.TXT");
+  sdtClearCache();
 }
 
 void sdt_init()
@@ -137,12 +123,12 @@ void sdt_init()
   sdtCount0 = 0;
   sdtTime = millis();
   sdtStartTime = now();
+
   //  SD卡读取当前配置
-  myFile = SD.open("SDT_SET.TXT");
-  sdtAlarmOrNot = (bool)(strToInt(myFile.readStringUntil('\n')));
-  sdtContinualOrNot = (bool)(strToInt(myFile.readStringUntil('\n')));
-  sdtDuration = strToInt(myFile.readStringUntil('\n'));//0为10min，1为20min，2为30min...
-  myFile.close();
+  byte t =  EEPROM.read(33);
+  sdtAlarmOrNot = (t & 16) >> 4;
+  sdtContinualOrNot = (t & 8) >> 3;
+  sdtDuration = t & 7;//0为10min，1为20min，2为30min...
 }
 
 void sdt_alarm()
@@ -153,13 +139,9 @@ void sdt_alarm()
     //    Serial.print("Continual:");
     //    Serial.println(sdtContinualOrNot);
     if (sdtContinualOrNot)
-    {
       sdtAlarmCtrl++;
-    }
     else
-    {
       sdtAlarmFlag = 0;
-    }
   }
 }
 
@@ -200,40 +182,32 @@ void sdt_judge()
       if (sdtCount0 > SDT_0_THR && sdtState)
       {
         //当进入静止状态时检测前一段时间是否出现坐下的动作
-        sdtCheck_res=sdtCheck(sdtAccel,sdtAccelP);
-        if(sdtCheck_res)
+        sdtCheck_res = sdtCheck(sdtAccel, sdtAccelP);
+        if (sdtCheck_res)
         {
           sdtState = 0; //坐
           sdtStartTime = now();
           sdtAlarmFlag = 1;
           sdtAlarmCtrl = 0;
 
-          if (SD.exists("SDT_CAC.TXT"))
+          unsigned long sdtCacheST, sdtCacheET;
+          EEPROM.get(36, sdtCacheST);
+          EEPROM.get(40, sdtCacheET);
+
+          if (sdtStartTime - sdtCacheET <= SDT_MERGE_INTERVAL)
           {
-            myFile = SD.open("SDT_CAC.TXT");
-            unsigned long sdtCacheST = strToLong(myFile.readStringUntil('\n'));
-            unsigned long sdtCacheET = strToLong(myFile.readStringUntil('\n'));
-            myFile.close();
-            SD.remove("SDT_CAC.TXT");
-            if (sdtStartTime - sdtCacheET <= SDT_MERGE_INTERVAL)
-            {
-              myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
-              myFile.println(sdtCacheST);
-              myFile.println(sdtStartTime);
-              myFile.close();
-              //改变起始时间
-              sdtStartTime = sdtCacheST;
-            }
-            else
-            {
-              sdt_save(sdtCacheET, sdtCacheST);
-              //写入新的缓存数据
-              myFile = SD.open("SDT_CAC.TXT", FILE_WRITE);
-              myFile.println(sdtStartTime);
-              myFile.println(now());
-              myFile.close();
-            }
+            EEPROM.put(40, sdtStartTime);
+            //改变起始时间
+            sdtStartTime = sdtCacheST;
           }
+          else
+          {
+            sdt_save(sdtCacheET, sdtCacheST);
+            //写入新的缓存数据
+            EEPROM.put(36, sdtStartTime);
+            EEPROM.put(40, now());
+          }
+
         }
       }
       //根据坐的时间，计算0-1的阈值，坐的时间越长，则阈值越大，即越不容易退出坐的状态

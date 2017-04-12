@@ -1,10 +1,9 @@
 #pragma once
 #include <SPI.h>
-#include <SD.h>
+#include "EEPROMhandler.h"
 #include "time.h"
 #include "alarmHandler.h"
 #include "BLEhandler.h"
-#include "file.h"
 
 #define STEP_INTERVAL_MIN 300
 #define STEP_INTERVAL_MAX 2000
@@ -34,17 +33,9 @@ bool stepAlarmFlag;
 
 void step_noi_update()
 {
-  int step_noi = 0;
-  if (SD.exists("STEP_NOI.TXT"))
-  {
-    myFile = SD.open("STEP_NOI.TXT");
-    step_noi = (int)(strToInt(myFile.readStringUntil('\n')));
-    myFile.close();
-    SD.remove("STEP_NOI.TXT");
-  }
-  SD.open("STEP_NOI.TXT", FILE_WRITE);
-  myFile.println(step_noi + 1);
-  myFile.close();
+  short step_noi;
+  EEPROM.get(17, step_noi);
+  EEPROM.put(17, step_noi + 1);
 }
 
 void step_save(unsigned long s, unsigned long e, int pkCount)
@@ -57,31 +48,19 @@ void step_save(unsigned long s, unsigned long e, int pkCount)
   //  Serial.print("  step:");
   //  Serial.println(pkCount);
   unsigned int params[9] = {4, year(e), month(e), day(e), hour(s), minute(s), hour(e), minute(e), pkCount};
-  myFile = SD.open("STEP_INF.TXT", FILE_WRITE);
   String s_temp;
   bleHandler.encode(s_temp, params);
-  myFile.println(s_temp);
-  myFile.close();
+  stepInfoWrite(s_temp);
   step_noi_update();
-  SD.remove("STEP_CAC.TXT");
-
-  //  SD.remove("STEP_TOT.TXT");
-  //  myFile = SD.open("STEP_TOT.TXT", FILE_WRITE);
-  //  myFile.println(steps + stepToday);
-  //  myFile.close();
-  //  SD.remove("STEP_CAC.TXT");
+  stepClearCache();
 }
 
 void step_init(int flag)
 {
   for (int i = 0; i < 5; i++)
-  {
     origStep[i] = 0;
-  }
   for (int i = 0; i < 3; i++)
-  {
     smoothStep[i] = 0;
-  }
   origStepPos = 0;
   smoothStepPos = 0;
   //  todayPos = 0;
@@ -97,47 +76,31 @@ void step_init(int flag)
   stepCacheTime = 0;
   stepCacheOn = 0;
 
-  if (flag == 1) {
-    //    Serial.println("init 0");
+  if (flag == 1)
     return;
-  }
 
   if (flag == 2)
   {
     stepAlarmFlag = 1;
-    SD.remove("STEP_ALA.TXT");
-    myFile = SD.open("STEP_ALA.TXT", FILE_WRITE);
-    myFile.println("1");
-    myFile.close();
+    EEPROM.update(12, EEPROM.read(12) | 16);
     //    Serial.print("ALARMFLAG1:");
     //    Serial.println(stepAlarmFlag);
     return;
   }
 
-  myFile = SD.open("STEP_ALA.TXT");
-  stepAlarmFlag = (bool)(strToInt(myFile.readStringUntil('\n')));
-  myFile.close();
+  stepAlarmFlag = (EEPROM.read(12) & 16) / 16;
   //  Serial.print("ALARMFLAG:");
   //  Serial.println(stepAlarmFlag);
 
-  if (SD.exists("STEP_CAC.TXT"))
-  {
-    myFile = SD.open("STEP_CAC.TXT");
-    unsigned long s = strToLong(myFile.readStringUntil('\n'));
-    unsigned long e = strToLong(myFile.readStringUntil('\n'));
-    int stepCache = strToInt(myFile.readStringUntil('\n'));
-    step_save(s, e, stepCache);
-    //    Serial.println("ccccc");
-    //    Serial.println(s);
-    //    Serial.println(e);
-    //    Serial.println(stepCache);
-    myFile.close();
-    SD.remove("STEP_CAC.TXT");
-  }
-  myFile = SD.open("STEP_SET.TXT");
-  stepAlarmOrNot = (bool)(strToInt(myFile.readStringUntil('\n')));
-  stepTarget = 50;////(int)(strToInt(myFile.readStringUntil('\n'))) * 1000;
-  myFile.close();
+  unsigned long s, e, stepCac;
+  EEPROM.get(23, s);
+  EEPROM.get(27, e);
+  EEPROM.get(31, stepCac);
+  step_save(s, e, stepCac);
+
+  byte stepSetTemp = EEPROM.read(12);
+  stepAlarmOrNot = (stepSetTemp & 32) / 32;
+  stepTarget = 50;//(stepSetTemp & 15) * 1000; //此处暂时设置为50
   //  Serial.print("alarmornot:");
   //  Serial.println(stepAlarmOrNot);
   //  Serial.print("Target:");
@@ -149,18 +112,15 @@ void step_target_detect()
   Serial.println("target detect!");
   if (!stepAlarmOrNot)
     return;
-  myFile = SD.open("STEP_TOT.TXT");
-  int stepToday = strToInt(myFile.readStringUntil('\n'));
-  myFile.close();
+  long stepToday;
+  EEPROM.get(13,stepToday);
   if (pkCount + stepToday >= stepTarget && stepAlarmFlag)
   {
     //    Serial.println("alarm now!");
     alarmHandler.start_alarm(TARGET_STEP_TONE_MODE);
     stepAlarmFlag = 0;
-    SD.remove("STEP_ALA.TXT");
-    myFile = SD.open("STEP_ALA.TXT", FILE_WRITE);
-    myFile.println("0");
-    myFile.close();
+
+    EEPROM.update(12,EEPROM.read(12) & 111); //对应位置1
   }
 }
 
@@ -175,18 +135,9 @@ void step_cache()
 
     stepCacheTime = now();
     //Serial.println("cache!");
-    SD.remove("STEP_CAC.TXT");
-    //    Serial.print("  starttime:");
-    //    Serial.print(stepStart);
-    //    Serial.print("  endtime:");
-    //    Serial.print(now());
-    //    Serial.print("  step:");
-    //    Serial.println(pkCount);
-    myFile = SD.open("STEP_CAC.TXT", FILE_WRITE);
-    myFile.println(stepStart);
-    myFile.println(now());
-    myFile.println(pkCount);
-    myFile.close();
+    EEPROM.put(19,stepStart);
+    EEPROM.put(23,now());
+    EEPROM.put(27,pkCount);
     step_target_detect();
   }
 }
@@ -202,17 +153,11 @@ void step_detect()
   {
     //此时退出一段步行状态
     step_save(stepStart, now(), pkCount);
-    myFile = SD.open("STEP_TOT.TXT");
-    int stepToday = strToInt(myFile.readStringUntil('\n'));
-    //    Serial.print("STEPTODAY:");
-    //    Serial.println(stepToday);
-    myFile.close();
-    SD.remove("STEP_TOT.TXT");
-    myFile = SD.open("STEP_TOT.TXT", FILE_WRITE);
-    myFile.println(intToStr(stepToday + pkCount));
-    myFile.close();
-    //    Serial.print("Total:");
-    //    Serial.println(intToStr(stepToday + pkCount));
+    
+    int stepToday;
+    EEPROM.get(13,stepToday);
+    EEPROM.put(13,stepToday + pkCount);
+
     step_init(1);
     step_target_detect();
   }

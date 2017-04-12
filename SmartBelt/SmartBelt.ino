@@ -15,13 +15,6 @@ void setup() {
   time_t_init();
   timeBefore = now();
   newDayTime = now();
-  /*init the SD*/
-  //Serial.println("init the SD");
-  file_init();
-  //  while (!file_init())
-  //  {
-  //    Serial.println("SD failed!");
-  //  }
   /*reset the switch part*/
   switch_init();
   /*reset the mpu part*/
@@ -36,7 +29,6 @@ void setup() {
   /*init the step*/
   step_init(0);
   Serial.println("reset");
-
 }
 
 void loop() {
@@ -139,7 +131,10 @@ void is_new_day()
   if (day(now()) != day(timeBefore))
   {
     //step
-    SD.remove("STEP_TOT.TXT");
+    EEPROM.update(13,0);
+    EEPROM.update(14,0);
+    EEPROM.update(15,0);
+    EEPROM.update(16,0);
     step_init(2);
     //alarm
     for (int i = 0; i < ALARM_NUM; i++)
