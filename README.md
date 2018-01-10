@@ -9,7 +9,7 @@ The Android Client for Smartbelt
 
 ## 2. Client Example
 
-![1](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/1.jpg)
+![1](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/1.jpg){: width="100px" height="100px"}
 ![2](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/2.jpg)
 ![3](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/3.jpg)
 ![4](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/4.jpg)
