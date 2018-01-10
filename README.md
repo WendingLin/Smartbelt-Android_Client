@@ -7,7 +7,15 @@ The Android Client for Smartbelt
 - Due to the complex plugins file structure, please directly visit the following address to see my source code
 **https://github.com/WendingLin/Smartbelt-Android_Client/tree/master/app/src/main/java/com/example/lycoris/smartbelt**
 
-## 2. Client Example
+## 2. Program Structure
+
+![7](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/7.png)
+
+## 3. Database Structure
+
+![7](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/8.png)
+
+## 4. Client Example
 
 ![1](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/1.jpg)
 ![2](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/2.jpg)
@@ -15,4 +23,4 @@ The Android Client for Smartbelt
 ![4](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/4.jpg)
 ![5](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/5.jpg)
 ![6](https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/6.jpg)
-<img src="https://github.com/WendingLin/Smartbelt-Android_Client/blob/master/.idea/img/1.jpg" alt="GitHub" title="GitHub,Social Coding" width="50" height="50" />
+
