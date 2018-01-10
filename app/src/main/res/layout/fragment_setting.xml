@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#eaeaea">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="40dp"
+        android:id="@+id/rv_setting_goal"
+        android:background="@drawable/sl_llcorner_top">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="步数设置"
+            android:id="@+id/textView"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="30dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="1000 步"
+            android:id="@+id/tv_setting_goal"
+            android:layout_marginEnd="60dp"
+            android:layout_alignTop="@+id/textView"
+            android:layout_alignParentEnd="true"/>
+
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="15dp"
+            android:id="@+id/imageView"
+            android:background="@mipmap/right_into"
+            android:layout_marginEnd="15dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/rv_setting_goal"
+        android:layout_alignParentStart="true"
+        android:id="@+id/relativeLayout4"
+        android:background="@drawable/sl_llcorner_top">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/rv_setting_sedtime"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/sl_llcorner_inside">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="提醒时限"
+                android:id="@+id/textview2"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="3 h 0 min"
+                android:id="@+id/tv_setting_sedentary"
+                android:layout_marginEnd="45dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:id="@+id/imageView2"
+                android:background="@mipmap/right_into"
+                android:layout_marginEnd="14dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@+id/rv_setting_sedtime"
+            android:id="@+id/rv_setting_sedrepeatopen"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/sl_llcorner_inside">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="重复提醒"
+                android:id="@+id/textView3"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+            <com.example.lycoris.smartbelt.uiwidget.SwitchButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="65dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:checked="false"
+                android:id="@+id/swi_setting_repeatopen"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@+id/rv_setting_sedrepeatopen"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/rv_setting_sedrepeattime"
+            android:background="#ffffff">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="重复提醒间隔"
+                android:id="@+id/textView4"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="30 min"
+                android:id="@+id/tv_setting_repeattime"
+                android:layout_marginEnd="50dp"
+                android:layout_alignTop="@+id/textView4"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:id="@+id/imageView3"
+                android:background="@mipmap/right_into"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="14dp"/>
+
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/relativeLayout4"
+        android:layout_alignParentStart="true"
+        android:id="@+id/relativeLayout5"
+        android:background="@drawable/sl_llcorner_top">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/rv_setting_antistolen">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="蓝牙防丢"
+                android:id="@+id/textView5"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+
+            <com.example.lycoris.smartbelt.uiwidget.SwitchButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="65dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:checked="false"
+                android:id="@+id/swi_setting_antistolen"/>
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout5"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:id="@+id/relativeLayout6"
+        android:background="@drawable/sl_llcorner_top">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/sl_llcorner_inside"
+            android:id="@+id/rv_setting_height"
+            android:layout_marginTop="0dp"
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="身高"
+                android:id="@+id/textview7"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="170 cm"
+                android:id="@+id/tv_setting_height"
+                android:layout_marginEnd="50dp"
+                android:layout_alignTop="@+id/textview7"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:id="@+id/imageView4"
+                android:background="@mipmap/right_into"
+                android:layout_marginEnd="14dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/rv_setting_weight"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/rv_setting_height">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="体重"
+                android:id="@+id/textView2"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="30dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="75 kg"
+                android:id="@+id/tv_setting_weight"
+                android:layout_marginEnd="58dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="15dp"
+                android:id="@+id/imageView5"
+                android:background="@mipmap/right_into"
+                android:layout_marginEnd="13dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
