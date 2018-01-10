@@ -2,6 +2,7 @@
 The Android Client for Smartbelt
 
 ## 1. Main Source Code 
+- **The source code is in app folder**
 - lycoris is my previous GitHub ID
 - Due to the complex plugins file structure, please directly visit the following address to see my source code
 **https://github.com/WendingLin/Smartbelt-Android_Client/tree/master/app/src/main/java/com/example/lycoris/smartbelt**
